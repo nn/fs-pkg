@@ -1,5 +1,5 @@
-;path.db=:memory:
-path.db=fs-pkg.db
+path.db=:memory:
+;path.db=fs-pkg.db
 ; This will be added soon, allowing saving database
 ; between restarts for faster loading
 ;path.db.persistant=/.pkgdb

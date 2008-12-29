@@ -3,6 +3,7 @@
 
 #include "balloc.h"
 struct pkg_inode {
+      char dummy[1];
 };
 
 typedef struct pkg_inode pkg_inode_t;

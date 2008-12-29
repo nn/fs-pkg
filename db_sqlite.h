@@ -12,7 +12,7 @@ struct pkg_object {
       char	*name;
       char	type;
       uid_t	owner;
-      gid_t	group;
+      gid_t	grp;
       size_t	size;
       off_t	offset;
       time_t	ctime;
@@ -25,7 +25,7 @@ extern void db_sqlite_close(void);
 extern void db_sqlite_close(void);
 extern int db_pkg_add(const char *path);
 extern int db_file_add(int pkg, const char *path, const char type,
-                       uid_t owner, gid_t group, size_t size, off_t offset,
+                       uid_t owner, gid_t grp, size_t size, off_t offset,
                        time_t ctime);
 extern int db_pkg_remove(const char *path);
 extern int db_file_remove(int pkg, const char *path);

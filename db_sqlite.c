@@ -51,18 +51,17 @@ static void db_sqlite_initialize(void) {
     *	                  (f)ile, (d)irectory, (l)ink, (p)ipe
     *                     f(i)fo, (c)haracter, (b)lock, (s)ocket
     *   owner: <uid_t>    object owner
-    *   group: <gid_t>    object group
+    *   grp:   <gid_t>    object group
     *    size: <size_t>   file size
     *  offset: <off_t>    within the package
     *   ctime: <time_t>   creation time
     *   inode: <uint32_t> unique node number for this object
     */
-/*   db_query(QUERY_NULL, "CREATE TABLE files (package INTEGER, path TEXT, type TEXT, owner INTEGER, group INTEGER, size INTEGER, offset INTEGER, ctime INTEGER, mode TEXT, target INTEGER, inode INTEGER PRIMARY KEY AUTOINCREMENT);"); */
-    db_query(QUERY_NULL, "CREATE TABLE files (package INTEGER, inode INTEGER PRIMARY KEY AUTOINCREMENT);");
+   db_query(QUERY_NULL, "CREATE TABLE files (package INTEGER, path TEXT, type TEXT, owner INTEGER, grp INTEGER, size INTEGER, offset INTEGER, ctime INTEGER, mode TEXT, target INTEGER, inode INTEGER PRIMARY KEY AUTOINCREMENT);");
     db_commit();
 }
 
-#define	SQL_BUFSIZE	8196
+#define	SQL_BUFSIZE	8192
 void *db_query(enum db_query_res_type type, const char *fmt, ...) {
     va_list ap;
     char *buf;
@@ -71,14 +70,17 @@ void *db_query(enum db_query_res_type type, const char *fmt, ...) {
     int i = 0, cols;
     void *ret = NULL;
 
-    if (!(buf = mem_alloc(SQL_BUFSIZE)))
+    if (!(buf = mem_alloc(SQL_BUFSIZE))) {
+       Log(LOG_ERROR, "%s: malloc: %d:%s", __FUNCTION__, errno, strerror(errno));
        return NULL;
+    }
 
     va_start(ap, fmt);
     vsnprintf(buf, SQL_BUFSIZE, fmt, ap);
     va_end(ap);
 
     Log(LOG_DEBUG, "SQL query: %s", buf);
+
     if ((i = sqlite3_prepare_v2(db_sqlite_db, buf, strlen(buf), &stmt, &tail) != SQLITE_OK)) {
        Log(LOG_WARNING, "SQL error: %s", sqlite3_errmsg(db_sqlite_db));
        mem_free(buf);
@@ -122,14 +124,14 @@ void *db_query(enum db_query_res_type type, const char *fmt, ...) {
 
 /* Open the database connection */
 int db_sqlite_open(const char *path) {
-   int exists = 0;
+   int exists = 1;
 
    if (db_sqlite_db != NULL)
       return 0;
 
    /* Look for database, if starts with ':' it's memory-backed */
-   if (path[0] != ':' && file_exists(path))
-      exists = 1;
+   if (path[0] == ':' || !file_exists(path))
+      exists = 0;
 
    if (sqlite3_open(path, &db_sqlite_db) != SQLITE_OK) {
       sqlite3_close(db_sqlite_db);
@@ -163,12 +165,12 @@ int db_pkg_add(const char *path) {
 
 /* type: [f]ile, [d]ir, [l]ink, [p]ipe, f[i]fo, [c]har, [b]lock, [s]ocket */
 int db_file_add(int pkg, const char *path, const char type,
-                uid_t owner, gid_t group, size_t size, off_t offset,
+                uid_t owner, gid_t grp, size_t size, off_t offset,
                 time_t ctime) {
 
     db_file_remove(pkg, path);
-    db_query(QUERY_INT, "INSERT INTO files (package, path, type, owner, group, offset, ctime, mode, target) VALUES (%lu, '%s', '%s', %lu, %lu, %lu, %lu, %lu, '%s', %lu);",
-         pkg, path, type, owner, group, size, offset, ctime);
+    db_query(QUERY_INT, "INSERT INTO files (package, path, type, owner, grp, offset, ctime, mode, target) VALUES (%lu, '%s', '%s', %lu, %lu, %lu, %lu, %lu, '%s', %lu);",
+         pkg, path, type, owner, grp, size, offset, ctime);
     return 0;
 }
 

@@ -234,7 +234,7 @@ int	pkg_forget(const char *path) {
 }
 
 void	pkg_init(void) {
-   if (!(pkg_heap = blockheap_create(sizeof(pkg_heap), dconf_get_int("tuning.heap.pkg", 128), "pkg"))) {
+   if (!(pkg_heap = blockheap_create(sizeof(struct pkg_handle), dconf_get_int("tuning.heap.pkg", 128), "pkg"))) {
       Log(LOG_FATAL, "pkg_init(): block allocator failed");
       exit(EXIT_FAILURE);
    }
