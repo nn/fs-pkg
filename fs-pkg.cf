@@ -1,0 +1,18 @@
+;path.db=:memory:
+path.db=fs-pkg.db
+; This will be added soon, allowing saving database
+; between restarts for faster loading
+;path.db.persistant=/.pkgdb
+path.log=fs-pkg.log
+path.mountpoint=/test
+path.pkg=/pkg
+sys.daemonize=false
+; these should be fairly reasonable...
+tuning.heap.inode=128
+tuning.heap.node=128
+tuning.heap.pkg=128
+tuning.heap.vfs_handle=512
+tuning.heap.vfs_watch=32
+tuning.timer.blockheap_gc=60
+tuning.timer.pkg_gc=60
+tuning.toc.gz.buffer=1310720

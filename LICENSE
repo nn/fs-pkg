@@ -1,0 +1,6 @@
+My code is MIT license.
+
+External code:
+	fuse/		LGPL, libfuse embedded
+	sqlite3*	SQLite3 license
+	xar/		BSD-license, libxar

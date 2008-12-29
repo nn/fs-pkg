@@ -1,0 +1,11 @@
+Work on a library (LD_PRELOAD) method.
+	* Needs read-only package database and a daemon to fill it
+	* Needs way to disable inotify, etc
+	* Needs way to disable fuse build
+	* Add a pass-through mode
+		- Try pkgdb
+			[noent] try spillover
+				[noent] try real fs
+	* Add in-place decompression (at least libz)
+		- To file
+		- To buffer

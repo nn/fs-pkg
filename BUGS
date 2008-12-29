@@ -1,0 +1,17 @@
+We handle Xar Table Of Contents in a particularly ugly way right now...
+	pkg.c:pkg_import(): Calls pkg_toc_extract
+		pkg_toc.c:pkg_toc_extract(): Extracts TOC to /pkg/$pkg.toc
+		pkg_toc.c:pkg_toc_load(): Parses the XML Table of Contents into db
+	pkg.c:pkg_import(): unlink(/pkg/$pkg.XXXXXX) where XXXXXX is random
+
+We need to look at extracting each TOC into a buffer then processing it.
+	This shouldn't be too hard since we know the uncompressed TOC size.
+
+We need to use errno more and add more error checking.
+
+
+Probably should try to modify dictionary to be type-generic
+	* If we do this, why not use it for package cache?
+		- This should reduce some of the mess which
+		  overhead of the cache versus using dlists. -bk
+		  - I still think the cache will be a win either way -jld
