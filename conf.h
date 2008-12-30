@@ -8,14 +8,23 @@
 #include "dictionary.h"
 #include "timestr.h"
 
-struct	conf {
-        FILE *log_fp;
-        int log_level;
-        char *mountpoint;
-        int dying;
-        dictionary *dict;
-        time_t born;
-        time_t now;
+enum log_priority {
+   LOG_DEBUG = 0,
+   LOG_INFO,
+   LOG_HACK,
+   LOG_WARNING,
+   LOG_ERROR,
+   LOG_FATAL
+};
+
+struct conf {
+   FILE       *log_fp;
+   enum log_priority log_level;
+   char       *mountpoint;
+   int         dying;
+   dictionary *dict;
+   time_t      born;
+   time_t      now;
 };
 
 extern struct conf conf;
@@ -31,4 +40,4 @@ extern int  dconf_set(const char *key, const char *val);
 extern void dconf_unset(const char *key);
 #define	NN2_DCONF_DICT conf.dict
 
-#endif	/* !defined(NN2_DCONF) */
+#endif                                 /* !defined(NN2_DCONF) */

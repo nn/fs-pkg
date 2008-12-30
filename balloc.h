@@ -13,11 +13,11 @@
 #include <stdlib.h>
 #include "dlink.h"
 struct Block {
-   size_t alloc_size;
+   size_t      alloc_size;
    struct Block *next;                 /* Next in our chain of blocks */
-   void  *elems;     	               /* Points to allocated memory */
-   dlink_list free_list;
-   dlink_list used_list;
+   void       *elems;                  /* Points to allocated memory */
+   dlink_list  free_list;
+   dlink_list  used_list;
 };
 typedef struct Block Block;
 
@@ -25,8 +25,8 @@ struct MemBlock {
 #ifdef DEBUG_BALLOC
    unsigned long magic;
 #endif
-   dlink_node self;
-   Block *block; 	               /* Which block we belong to */
+   dlink_node  self;
+   Block      *block;                  /* Which block we belong to */
 };
 
 typedef struct MemBlock MemBlock;
@@ -34,7 +34,7 @@ typedef struct MemBlock MemBlock;
 /* information for the root node of the heap */
 struct BlockHeap {
    dlink_node  hlist;
-   char	      name[64];			/* heap name */
+   char        name[64];               /* heap name */
    size_t      elemSize;               /* Size of each element to be stored */
    unsigned long elemsPerBlock;        /* Number of elements per block */
    unsigned long blocksAllocated;      /* Number of blocks allocated */
@@ -52,4 +52,4 @@ extern int  blockheap_destroy(BlockHeap * bh);
 extern void blockheap_init(void);
 extern void blockheap_usage(BlockHeap * bh, size_t * bused, size_t * bfree, size_t * bmemusage);
 
-#endif	/* !defined(NN2_BALLOC) */
+#endif                                 /* !defined(NN2_BALLOC) */

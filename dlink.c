@@ -15,18 +15,21 @@
  *
  *  #Id: tools.c,v 1.6 2002/06/24 16:21:51 leeh Exp #
  */
-
+#include <signal.h>
 #include "balloc.h"
 #include "conf.h"
 #include "dlink.h"
 #include "logger.h"
 int         dlink_count = 0;
-BlockHeap *node_heap;
+BlockHeap  *node_heap;
 
 void dlink_init(void) {
-   if (!(node_heap = blockheap_create(sizeof(dlink_node), dconf_get_int("tuning.heap.node", 1024), "dlink_node"))) {
+   if (!
+       (node_heap =
+        blockheap_create(sizeof(dlink_node),
+                         dconf_get_int("tuning.heap.node", 1024), "dlink_node"))) {
       Log(LOG_FATAL, "dlink_init(): block allocator failed");
-      exit(EXIT_FAILURE);
+      raise(SIGTERM);
    }
 }
 

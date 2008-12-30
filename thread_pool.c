@@ -5,22 +5,21 @@
  * XXX: pthreads lib, anyone have a use for that?
  * XXX; - jld 20081102 [bug: 33]
  */
-#include "thread_pool.h"
 #include <stdlib.h>
+#include <signal.h>
+#include "thread_pool.h"
 #include "memory.h"
 
 thread_t   *thr_create(void *cb, void *arg, size_t stack_size) {
    thread_t   *ret = mem_alloc(sizeof(thread_t));
 
-   if (ret == NULL)
-      exit(EXIT_FAILURE);
-
-   if ((ret->pa = mem_alloc(sizeof(pthread_attr_t))) == NULL)
-      exit(EXIT_FAILURE);
+   if (!ret || (ret->pa = mem_alloc(sizeof(pthread_attr_t))) == NULL)
+      raise(SIGTERM);
 
    if (pthread_attr_init(ret->pa) != 0) {
       Log(LOG_ERROR, "%s:pthread_attr_init %d:%s", __FUNCTION__, errno, strerror(errno));
-      exit(EXIT_FAILURE);
+      mem_free(ret);
+      return NULL;
    }
 
    if (stack_size > 0)
@@ -28,7 +27,8 @@ thread_t   *thr_create(void *cb, void *arg, size_t stack_size) {
 
    if (pthread_create(&ret->pth, ret->pa, cb, arg) != 0) {
       Log(LOG_ERROR, "%s:pthread_create %d:%s", __FUNCTION__, errno, strerror(errno));
-      exit(EXIT_FAILURE);
+      mem_free(ret);
+      return NULL;
    }
 
    return ret;

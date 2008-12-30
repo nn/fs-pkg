@@ -68,4 +68,4 @@ extern void dlink_fini(void);
 #define dlink_add_tail_alloc(data, list) dlink_add_tail(data, dlink_create(), list)
 #define dlink_add_alloc(data, list) dlink_add(data, dlink_create(), list)
 #define dlink_destroy(node, list) do { dlink_delete(node, list); dlink_free(node); } while(0)
-#endif	/* !defined(NN2_DLINK) */
+#endif                                 /* !defined(NN2_DLINK) */

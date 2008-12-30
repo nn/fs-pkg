@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <signal.h>
 #include <strings.h>
 #include "conf.h"
 #include "dictionary.h"
@@ -29,7 +30,7 @@ void dconf_init(const char *file) {
 
    if (!(fp = fopen(file, "r"))) {
       Log(LOG_FATAL, "unable to open config file %s", file);
-      exit(EXIT_FAILURE);
+      raise(SIGTERM);
    }
 
    while (!feof(fp)) {
@@ -68,15 +69,14 @@ void dconf_init(const char *file) {
       if (in_comment)
          continue;                     /* ignored line, in block comment */
 
-
       key = p;
 
       if ((val = strchr(p, '=')) != NULL) {
-          *val = '\0';
-          val++;
+         *val = '\0';
+         val++;
       }
 
-      val = str_unquote(val);           
+      val = str_unquote(val);
       dconf_set(key, val);
    }
 }
@@ -128,7 +128,7 @@ char       *dconf_get_str(const char *key, const char *def) {
 }
 
 time_t dconf_get_time(const char *key, const time_t def) {
-      return (nn2_timestr_to_time(dconf_get_str(key, NULL), def));
+   return (nn2_timestr_to_time(dconf_get_str(key, NULL), def));
 }
 
 int dconf_set(const char *key, const char *val) {

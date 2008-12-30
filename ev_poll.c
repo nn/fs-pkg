@@ -39,102 +39,87 @@
 
 #include <poll.h>
 
-void inline_size
-pollidx_init (int *base, int count)
-{
-  /* consider using memset (.., -1, ...), which is pratically guarenteed
-   * to work on all systems implementing poll */
-  while (count--)
-    *base++ = -1;
+void inline_size pollidx_init(int *base, int count) {
+   /*
+    * consider using memset (.., -1, ...), which is pratically guarenteed
+    * * to work on all systems implementing poll 
+    */
+   while (count--)
+      *base++ = -1;
 }
 
-static void
-poll_modify (EV_P_ int fd, int oev, int nev)
-{
-  int idx;
+static void poll_modify(EV_P_ int fd, int oev, int nev) {
+   int         idx;
 
-  if (oev == nev)
-    return;
+   if (oev == nev)
+      return;
 
-  array_needsize (int, pollidxs, pollidxmax, fd + 1, pollidx_init);
+   array_needsize(int, pollidxs, pollidxmax, fd + 1, pollidx_init);
 
-  idx = pollidxs [fd];
+   idx = pollidxs[fd];
 
-  if (idx < 0) /* need to allocate a new pollfd */
-    {
-      pollidxs [fd] = idx = pollcnt++;
-      array_needsize (struct pollfd, polls, pollmax, pollcnt, EMPTY2);
-      polls [idx].fd = fd;
-    }
+   if (idx < 0) {                      /* need to allocate a new pollfd */
+      pollidxs[fd] = idx = pollcnt++;
+      array_needsize(struct pollfd, polls, pollmax, pollcnt, EMPTY2);
+      polls[idx].fd = fd;
+   }
 
-  assert (polls [idx].fd == fd);
+   assert(polls[idx].fd == fd);
 
-  if (nev)
-    polls [idx].events =
-        (nev & EV_READ ? POLLIN : 0)
-        | (nev & EV_WRITE ? POLLOUT : 0);
-  else /* remove pollfd */
-    {
-      pollidxs [fd] = -1;
+   if (nev)
+      polls[idx].events = (nev & EV_READ ? POLLIN : 0)
+          | (nev & EV_WRITE ? POLLOUT : 0);
+   else {                              /* remove pollfd */
 
-      if (expect_true (idx < --pollcnt))
-        {
-          polls [idx] = polls [pollcnt];
-          pollidxs [polls [idx].fd] = idx;
-        }
-    }
+      pollidxs[fd] = -1;
+
+      if (expect_true(idx < --pollcnt)) {
+         polls[idx] = polls[pollcnt];
+         pollidxs[polls[idx].fd] = idx;
+      }
+   }
 }
 
-static void
-poll_poll (EV_P_ ev_tstamp timeout)
-{
-  struct pollfd *p;
-  int res = poll (polls, pollcnt, (int)ceil (timeout * 1000.));
+static void poll_poll(EV_P_ ev_tstamp timeout) {
+   struct pollfd *p;
+   int         res = poll(polls, pollcnt, (int)ceil(timeout * 1000.));
 
-  if (expect_false (res < 0))
-    {
+   if (expect_false(res < 0)) {
       if (errno == EBADF)
-        fd_ebadf (EV_A);
+         fd_ebadf(EV_A);
       else if (errno == ENOMEM && !syserr_cb)
-        fd_enomem (EV_A);
+         fd_enomem(EV_A);
       else if (errno != EINTR)
-        ev_syserr ("(libev) poll");
-    }
-  else
-    for (p = polls; res; ++p)
-      if (expect_false (p->revents)) /* this expect is debatable */
-        {
-          --res;
+         ev_syserr("(libev) poll");
+   } else
+      for (p = polls; res; ++p)
+         if (expect_false(p->revents)) {  /* this expect is debatable */
+            --res;
 
-          if (expect_false (p->revents & POLLNVAL))
-            fd_kill (EV_A_ p->fd);
-          else
-            fd_event (
-              EV_A_
-              p->fd,
-              (p->revents & (POLLOUT | POLLERR | POLLHUP) ? EV_WRITE : 0)
-              | (p->revents & (POLLIN | POLLERR | POLLHUP) ? EV_READ : 0)
-            );
-        }
+            if (expect_false(p->revents & POLLNVAL))
+               fd_kill(EV_A_ p->fd);
+            else
+               fd_event(EV_A_ p->fd, (p->revents & (POLLOUT | POLLERR | POLLHUP) ? EV_WRITE : 0)
+                        | (p->revents & (POLLIN | POLLERR | POLLHUP) ? EV_READ : 0)
+                   );
+         }
 }
 
-int inline_size
-poll_init (EV_P_ int flags)
-{
-  backend_fudge  = 0.; /* posix says this is zero */
-  backend_modify = poll_modify;
-  backend_poll   = poll_poll;
+int inline_size poll_init(EV_P_ int flags) {
+   backend_fudge = 0.;                 /* posix says this is zero */
+   backend_modify = poll_modify;
+   backend_poll = poll_poll;
 
-  pollidxs = 0; pollidxmax = 0;
-  polls    = 0; pollmax    = 0; pollcnt = 0;
+   pollidxs = 0;
+   pollidxmax = 0;
+   polls = 0;
+   pollmax = 0;
+   pollcnt = 0;
 
-  return EVBACKEND_POLL;
+   return EVBACKEND_POLL;
 }
 
-void inline_size
-poll_destroy (EV_P)
-{
-  ev_free (pollidxs);
-  ev_free (polls);
+void inline_size poll_destroy(EV_P) {
+   ev_free(pollidxs);
+   ev_free(polls);
 }
-

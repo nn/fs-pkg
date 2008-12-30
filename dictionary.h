@@ -41,7 +41,7 @@ typedef struct _dictionary_ {
   The key is stored anyway in the struct so that collision can be avoided
   by comparing the key itself in last resort.
  */
-extern unsigned    dictionary_hash(const char *key);
+extern unsigned dictionary_hash(const char *key);
 
 /**
   @brief    Create a new dictionary object.
@@ -61,7 +61,7 @@ extern dictionary *dictionary_new(int size);
 
   Deallocate a dictionary object and all memory associated to it.
  */
-extern void        dictionary_del(dictionary * vd);
+extern void dictionary_del(dictionary * vd);
 
 /**
   @brief    Get a value from a dictionary.
@@ -75,7 +75,7 @@ extern void        dictionary_del(dictionary * vd);
   dictionary. The returned character pointer points to data internal to the
   dictionary object, you should not try to free it or modify it.
  */
-extern char       *dictionary_get(dictionary * d, const char *key, const char *def);
+extern char *dictionary_get(dictionary * d, const char *key, const char *def);
 
 /**
   @brief    Set a value in a dictionary.
@@ -101,7 +101,7 @@ extern char       *dictionary_get(dictionary * d, const char *key, const char *d
 
   This function returns non-zero in case of failure.
  */
-extern int         dictionary_set(dictionary * vd, const char *key, const char *val);
+extern int  dictionary_set(dictionary * vd, const char *key, const char *val);
 
 /**
   @brief    Delete a key in a dictionary
@@ -112,7 +112,7 @@ extern int         dictionary_set(dictionary * vd, const char *key, const char *
   This function deletes a key in a dictionary. Nothing is done if the
   key cannot be found.
  */
-extern void        dictionary_unset(dictionary * d, const char *key);
+extern void dictionary_unset(dictionary * d, const char *key);
 
 /**
   @brief    Dump a dictionary to an opened file pointer.
@@ -124,6 +124,6 @@ extern void        dictionary_unset(dictionary * d, const char *key);
   as @c [Key]=[Value], one per line. It is Ok to provide stdout or stderr as
   output file pointers.
  */
-extern void        dictionary_dump(dictionary * d, FILE * out);
+extern void dictionary_dump(dictionary * d, FILE * out);
 
-#endif	/* !defined(NN2_DICTIONARY) */
+#endif                                 /* !defined(NN2_DICTIONARY) */

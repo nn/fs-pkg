@@ -12,7 +12,7 @@ void evt_init(void) {
    evt_loop = ev_default_loop(0);
 }
 
-ev_timer *evt_timer_add_periodic(void *callback, const char *name, int interval) {
+ev_timer   *evt_timer_add_periodic(void *callback, const char *name, int interval) {
    ev_timer   *timer = mem_alloc(sizeof(ev_timer));
    ev_timer_init(timer, callback, 0, interval);
    ev_timer_start(evt_loop, timer);
@@ -20,9 +20,9 @@ ev_timer *evt_timer_add_periodic(void *callback, const char *name, int interval)
 }
 
 /* MAKE DAMN SURE YOUR CALLBACK DOES A mem_free() ON TIMER!!! */
-ev_timer *evt_timer_add_oneshot(void *callback, const char *name, int timeout) {
-  ev_timer *timer = mem_alloc(sizeof(ev_timer));
-  ev_timer_init(timer, callback, timeout, 0);
-  ev_timer_start(evt_loop, timer);
-  return timer;
+ev_timer   *evt_timer_add_oneshot(void *callback, const char *name, int timeout) {
+   ev_timer   *timer = mem_alloc(sizeof(ev_timer));
+   ev_timer_init(timer, callback, timeout, 0);
+   ev_timer_start(evt_loop, timer);
+   return timer;
 }

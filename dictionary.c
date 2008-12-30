@@ -231,7 +231,7 @@ int dictionary_set(dictionary * d, const char *key, const char *val) {
                 */
                if (d->val[i] != NULL)
                   mem_free(d->val[i]);
-               d->val[i] = val ? str_dup(val) : NULL; 
+               d->val[i] = val ? str_dup(val) : NULL;
                /*
                 * Value has been modified: return 
                 */

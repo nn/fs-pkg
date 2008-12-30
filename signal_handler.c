@@ -2,8 +2,8 @@
 #include "conf.h"
 #include "evt.h"
 #include "signal_handler.h"
-static ev_signal   signal_die;
-static ev_signal   signal_reload;
+static ev_signal signal_die;
+static ev_signal signal_reload;
 
 static void signal_handler_die(struct ev_loop *loop, ev_signal * w, int revents) {
    conf.dying = 1;

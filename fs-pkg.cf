@@ -1,9 +1,11 @@
-path.db=:memory:
-;path.db=fs-pkg.db
+; log.level [debug|info|warning|error|fatal|hack]
+log.level=debug
+;path.db=:memory:
+path.db=fs-pkg.db
 ; This will be added soon, allowing saving database
 ; between restarts for faster loading
 ;path.db.persistant=/.pkgdb
-path.log=fs-pkg.log
+;path.log=fs-pkg.log
 path.mountpoint=/test
 path.pkg=/pkg
 sys.daemonize=false

@@ -31,5 +31,5 @@
 #if	!defined(NN2_ATOMICIO)
 #include <sys/types.h>
 #define	NN2_ATOMICIO
-ssize_t	atomicio(ssize_t (*)(), int, void *, size_t);
-#endif	/* !defined(NN2_ATOMICIO) */
+ssize_t     atomicio(ssize_t(*)(), int, void *, size_t);
+#endif                                 /* !defined(NN2_ATOMICIO) */

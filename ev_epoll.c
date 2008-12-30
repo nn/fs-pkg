@@ -59,157 +59,158 @@
 
 #include <sys/epoll.h>
 
-static void
-epoll_modify (EV_P_ int fd, int oev, int nev)
-{
-  struct epoll_event ev;
-  unsigned char oldmask;
+static void epoll_modify(EV_P_ int fd, int oev, int nev) {
+   struct epoll_event ev;
+   unsigned char oldmask;
 
-  /*
-   * we handle EPOLL_CTL_DEL by ignoring it here
-   * on the assumption that the fd is gone anyways
-   * if that is wrong, we have to handle the spurious
-   * event in epoll_poll.
-   * if the fd is added again, we try to ADD it, and, if that
-   * fails, we assume it still has the same eventmask.
-   */
-  if (!nev)
-    return;
+   /*
+    * we handle EPOLL_CTL_DEL by ignoring it here
+    * on the assumption that the fd is gone anyways
+    * if that is wrong, we have to handle the spurious
+    * event in epoll_poll.
+    * if the fd is added again, we try to ADD it, and, if that
+    * fails, we assume it still has the same eventmask.
+    */
+   if (!nev)
+      return;
 
-  oldmask = anfds [fd].emask;
-  anfds [fd].emask = nev;
+   oldmask = anfds[fd].emask;
+   anfds[fd].emask = nev;
 
-  /* store the generation counter in the upper 32 bits, the fd in the lower 32 bits */
-  ev.data.u64 = (uint64_t)(uint32_t)fd
-              | ((uint64_t)(uint32_t)++anfds [fd].egen << 32);
-  ev.events   = (nev & EV_READ  ? EPOLLIN  : 0)
-              | (nev & EV_WRITE ? EPOLLOUT : 0);
+   /*
+    * store the generation counter in the upper 32 bits, the fd in the lower 32 bits 
+    */
+   ev.data.u64 = (uint64_t) (uint32_t) fd | ((uint64_t) (uint32_t)++ anfds[fd].egen << 32);
+   ev.events = (nev & EV_READ ? EPOLLIN : 0)
+       | (nev & EV_WRITE ? EPOLLOUT : 0);
 
-  if (expect_true (!epoll_ctl (backend_fd, oev ? EPOLL_CTL_MOD : EPOLL_CTL_ADD, fd, &ev)))
-    return;
+   if (expect_true(!epoll_ctl(backend_fd, oev ? EPOLL_CTL_MOD : EPOLL_CTL_ADD, fd, &ev)))
+      return;
 
-  if (expect_true (errno == ENOENT))
-    {
-      /* if ENOENT then the fd went away, so try to do the right thing */
+   if (expect_true(errno == ENOENT)) {
+      /*
+       * if ENOENT then the fd went away, so try to do the right thing 
+       */
       if (!nev)
-        goto dec_egen;
+         goto dec_egen;
 
-      if (!epoll_ctl (backend_fd, EPOLL_CTL_ADD, fd, &ev))
-        return;
-    }
-  else if (expect_true (errno == EEXIST))
-    {
-      /* EEXIST means we ignored a previous DEL, but the fd is still active */
-      /* if the kernel mask is the same as the new mask, we assume it hasn't changed */
+      if (!epoll_ctl(backend_fd, EPOLL_CTL_ADD, fd, &ev))
+         return;
+   } else if (expect_true(errno == EEXIST)) {
+      /*
+       * EEXIST means we ignored a previous DEL, but the fd is still active 
+       */
+      /*
+       * if the kernel mask is the same as the new mask, we assume it hasn't changed 
+       */
       if (oldmask == nev)
-        goto dec_egen;
+         goto dec_egen;
 
-      if (!epoll_ctl (backend_fd, EPOLL_CTL_MOD, fd, &ev))
-        return;
-    }
+      if (!epoll_ctl(backend_fd, EPOLL_CTL_MOD, fd, &ev))
+         return;
+   }
 
-  fd_kill (EV_A_ fd);
+   fd_kill(EV_A_ fd);
 
-dec_egen:
-  /* we didn't successfully call epoll_ctl, so decrement the generation counter again */
-  --anfds [fd].egen;
+   dec_egen:
+   /*
+    * we didn't successfully call epoll_ctl, so decrement the generation counter again 
+    */
+   --anfds[fd].egen;
 }
 
-static void
-epoll_poll (EV_P_ ev_tstamp timeout)
-{
-  int i;
-  int eventcnt = epoll_wait (backend_fd, epoll_events, epoll_eventmax, (int)ceil (timeout * 1000.));
+static void epoll_poll(EV_P_ ev_tstamp timeout) {
+   int         i;
+   int         eventcnt = epoll_wait(backend_fd, epoll_events, epoll_eventmax,
+                                     (int)ceil(timeout * 1000.));
 
-  if (expect_false (eventcnt < 0))
-    {
+   if (expect_false(eventcnt < 0)) {
       if (errno != EINTR)
-        ev_syserr ("(libev) epoll_wait");
+         ev_syserr("(libev) epoll_wait");
 
       return;
-    }
+   }
 
-  for (i = 0; i < eventcnt; ++i)
-    {
+   for (i = 0; i < eventcnt; ++i) {
       struct epoll_event *ev = epoll_events + i;
 
-      int fd = (uint32_t)ev->data.u64; /* mask out the lower 32 bits */
-      int want = anfds [fd].events;
-      int got  = (ev->events & (EPOLLOUT | EPOLLERR | EPOLLHUP) ? EV_WRITE : 0)
-               | (ev->events & (EPOLLIN  | EPOLLERR | EPOLLHUP) ? EV_READ  : 0);
+      int         fd = (uint32_t) ev->data.u64; /* mask out the lower 32 bits */
+      int         want = anfds[fd].events;
+      int         got = (ev->events & (EPOLLOUT | EPOLLERR | EPOLLHUP) ? EV_WRITE : 0)
+          | (ev->events & (EPOLLIN | EPOLLERR | EPOLLHUP) ? EV_READ : 0);
 
-      /* check for spurious notification */
-      if (expect_false ((uint32_t)anfds [fd].egen != (uint32_t)(ev->data.u64 >> 32)))
-        {
-          /* recreate kernel state */
-          postfork = 1;
-          continue;
-        }
+      /*
+       * check for spurious notification 
+       */
+      if (expect_false((uint32_t) anfds[fd].egen != (uint32_t) (ev->data.u64 >> 32))) {
+         /*
+          * recreate kernel state 
+          */
+         postfork = 1;
+         continue;
+      }
 
-      if (expect_false (got & ~want))
-        {
-          anfds [fd].emask = want;
+      if (expect_false(got & ~want)) {
+         anfds[fd].emask = want;
 
-          /* we received an event but are not interested in it, try mod or del */
-          /* I don't think we ever need MOD, but let's handle it anyways */
-          ev->events = (want & EV_READ  ? EPOLLIN  : 0)
-                     | (want & EV_WRITE ? EPOLLOUT : 0);
+         /*
+          * we received an event but are not interested in it, try mod or del 
+          */
+         /*
+          * I don't think we ever need MOD, but let's handle it anyways 
+          */
+         ev->events = (want & EV_READ ? EPOLLIN : 0)
+             | (want & EV_WRITE ? EPOLLOUT : 0);
 
-          if (epoll_ctl (backend_fd, want ? EPOLL_CTL_MOD : EPOLL_CTL_DEL, fd, ev))
-            {
-              postfork = 1; /* an error occured, recreate kernel state */
-              continue;
-            }
-        }
+         if (epoll_ctl(backend_fd, want ? EPOLL_CTL_MOD : EPOLL_CTL_DEL, fd, ev)) {
+            postfork = 1;              /* an error occured, recreate kernel state */
+            continue;
+         }
+      }
 
-      fd_event (EV_A_ fd, got);
-    }
+      fd_event(EV_A_ fd, got);
+   }
 
-  /* if the receive array was full, increase its size */
-  if (expect_false (eventcnt == epoll_eventmax))
-    {
-      ev_free (epoll_events);
-      epoll_eventmax = array_nextsize (sizeof (struct epoll_event), epoll_eventmax, epoll_eventmax + 1);
-      epoll_events = (struct epoll_event *)ev_malloc (sizeof (struct epoll_event) * epoll_eventmax);
-    }
+   /*
+    * if the receive array was full, increase its size 
+    */
+   if (expect_false(eventcnt == epoll_eventmax)) {
+      ev_free(epoll_events);
+      epoll_eventmax =
+          array_nextsize(sizeof(struct epoll_event), epoll_eventmax, epoll_eventmax + 1);
+      epoll_events = (struct epoll_event *)ev_malloc(sizeof(struct epoll_event) * epoll_eventmax);
+   }
 }
 
-int inline_size
-epoll_init (EV_P_ int flags)
-{
-  backend_fd = epoll_create (256);
+int inline_size epoll_init(EV_P_ int flags) {
+   backend_fd = epoll_create(256);
 
-  if (backend_fd < 0)
-    return 0;
+   if (backend_fd < 0)
+      return 0;
 
-  fcntl (backend_fd, F_SETFD, FD_CLOEXEC);
+   fcntl(backend_fd, F_SETFD, FD_CLOEXEC);
 
-  backend_fudge  = 0.; /* kernel sources seem to indicate this to be zero */
-  backend_modify = epoll_modify;
-  backend_poll   = epoll_poll;
+   backend_fudge = 0.;                 /* kernel sources seem to indicate this to be zero */
+   backend_modify = epoll_modify;
+   backend_poll = epoll_poll;
 
-  epoll_eventmax = 64; /* initial number of events receivable per poll */
-  epoll_events = (struct epoll_event *)ev_malloc (sizeof (struct epoll_event) * epoll_eventmax);
+   epoll_eventmax = 64;                /* initial number of events receivable per poll */
+   epoll_events = (struct epoll_event *)ev_malloc(sizeof(struct epoll_event) * epoll_eventmax);
 
-  return EVBACKEND_EPOLL;
+   return EVBACKEND_EPOLL;
 }
 
-void inline_size
-epoll_destroy (EV_P)
-{
-  ev_free (epoll_events);
+void inline_size epoll_destroy(EV_P) {
+   ev_free(epoll_events);
 }
 
-void inline_size
-epoll_fork (EV_P)
-{
-  close (backend_fd);
+void inline_size epoll_fork(EV_P) {
+   close(backend_fd);
 
-  while ((backend_fd = epoll_create (256)) < 0)
-    ev_syserr ("(libev) epoll_create");
+   while ((backend_fd = epoll_create(256)) < 0)
+      ev_syserr("(libev) epoll_create");
 
-  fcntl (backend_fd, F_SETFD, FD_CLOEXEC);
+   fcntl(backend_fd, F_SETFD, FD_CLOEXEC);
 
-  fd_rearm_all (EV_A);
+   fd_rearm_all(EV_A);
 }
-

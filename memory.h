@@ -54,4 +54,4 @@ static __inline void *mem_calloc(size_t nmemb, size_t size) {
 
    return p;
 }
-#endif	/* !defined(NN2_MEMORY) */
+#endif                                 /* !defined(NN2_MEMORY) */

@@ -8,6 +8,25 @@
 
 FILE       *log_open(const char *path) {
    FILE       *fp;
+   char       *lvl;
+
+   lvl = dconf_get_str("log.level", 0);
+
+   /*
+    * parse the debug level 
+    */
+   if (!strcasecmp(lvl, "debug"))
+      conf.log_level = LOG_DEBUG;
+   else if (!strcasecmp(lvl, "info"))
+      conf.log_level = LOG_INFO;
+   else if (!strcasecmp(lvl, "hack"))
+      conf.log_level = LOG_HACK;
+   else if (!strcasecmp(lvl, "warning"))
+      conf.log_level = LOG_WARNING;
+   else if (!strcasecmp(lvl, "error"))
+      conf.log_level = LOG_ERROR;
+   else if (!strcasecmp(lvl, "fatal"))
+      conf.log_level = LOG_FATAL;
 
    if ((fp = fopen(path, "w")) == NULL) {
       Log(LOG_ERROR, "Unable to open log file %s: %d (%s)", path, errno, strerror(errno));
@@ -61,7 +80,7 @@ void Log(enum log_priority priority, const char *fmt, ...) {
       case LOG_HACK:
          level = "hack";
          break;
-   default:
+      default:
          level = "unknown";
          break;
    }

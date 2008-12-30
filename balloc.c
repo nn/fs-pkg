@@ -77,7 +77,8 @@ static void blockheap_gc(int fd, short event, void *arg) {
 
 void blockheap_init(void) {
    evt_timer_add_periodic(blockheap_gc, "gc.blockheap",
-                 nn2_timestr_to_time(dconf_get_str("tuning.timer.blockheap_gc", NULL), 60));
+                          nn2_timestr_to_time(dconf_get_str
+                                              ("tuning.timer.blockheap_gc", NULL), 60));
 }
 
 /*
@@ -320,7 +321,9 @@ int blockheap_free(BlockHeap * bh, void *ptr) {
       conf.dying = 1;
    }
 
-   /* Just in case... */
+   /*
+    * Just in case... 
+    */
    memset(ptr, 0, bh->elemSize);
 
    block = memblock->block;
@@ -428,8 +431,9 @@ void blockheap_usage(BlockHeap * bh, size_t * bused, size_t * bfree, size_t * bm
       *bfree = freem;
    if (bmemusage != NULL)
       *bmemusage = memusage;
-   Log(LOG_INFO, "Block Heap Allocator statistics: heap=%s used=%lu free=%lu memusage=%lu", bh->name,
-     used, freem, memusage);
+   Log(LOG_INFO,
+       "Block Heap Allocator statistics: heap=%s used=%lu free=%lu memusage=%lu",
+       bh->name, used, freem, memusage);
 }
 
 /* vim:cinoptions=>s,e0,n0,f0,{0,}0,^0,=s,ps,t0,c3,+s,(2s,us,)20,*30,gs,hs
