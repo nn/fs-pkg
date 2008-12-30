@@ -21,6 +21,7 @@ struct vfs_watch {
 };
 
 struct vfs_fake_stat {
+   u_int32_t   st_ino;
    mode_t      st_mode;
    off_t       st_size;
    uid_t       st_uid;

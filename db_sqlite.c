@@ -65,7 +65,7 @@ static void db_sqlite_initialize(void) {
    db_query(QUERY_NULL,
             "CREATE TABLE files (package INTEGER, path TEXT, type TEXT, owner INTEGER, grp INTEGER, size INTEGER, mode INTEGER, offset INTEGER, ctime INTEGER, target INTEGER, inode INTEGER PRIMARY KEY AUTOINCREMENT);");
    db_query(QUERY_NULL,
-            "INSERT INTO files (package, path, type, size, offset, owner, grp, mode) VALUES ('', '/', 'd', 0, 0, 0, 0, 0755);");
+            "INSERT INTO files (package, path, type, size, offset, owner, grp, mode) VALUES ('', '/', 'd', 0, 0, 0, 0, 16895);");
    db_commit();
 }
 
@@ -77,6 +77,7 @@ void       *db_query(enum db_query_res_type type, const char *fmt, ...) {
    sqlite3_stmt *stmt;
    int         i = 0, cols;
    void       *ret = NULL;
+   pkg_inode_t *inode;
 
    if (!(buf = mem_alloc(SQL_BUFSIZE))) {
       Log(LOG_ERROR, "%s: malloc: %d:%s", __FUNCTION__, errno, strerror(errno));
@@ -99,9 +100,6 @@ void       *db_query(enum db_query_res_type type, const char *fmt, ...) {
    while (sqlite3_step(stmt) == SQLITE_ROW) {
       cols = sqlite3_column_count(stmt);
 
-/* XXX: build a list and throw it back
-       while (i < cols) {
-*/
       switch (type) {
          case QUERY_NULL:
             return (void *)0;
@@ -113,14 +111,30 @@ void       *db_query(enum db_query_res_type type, const char *fmt, ...) {
             break;
          case QUERY_INODE:
             ret = (void *)blockheap_alloc(inode_heap);
+            inode = (pkg_inode_t *)ret;
+
+            /* troll through the stupid db crap */
+            while (i < cols) {
+               char *colname = sqlite3_column_name(stmt, i);
+
+               if (!strcmp(colname, "gid"))
+                  inode->st_gid = sqlite3_column_int64(stmt, i);
+               else if (!strcmp(colname, "inode"))
+                  inode->st_ino = sqlite3_column_int(stmt, i);
+               else if (!strcmp(colname, "mode"))
+                  inode->st_mode = sqlite3_column_int(stmt, i);
+               else if (!strcmp(colname, "size"))
+                  inode->st_size = sqlite3_column_int64(stmt, i);
+               else if (!strcmp(colname, "time"))
+                  inode->st_time = sqlite3_column_int64(stmt, i);
+               else if (!strcmp(colname, "uid"))
+                  inode->st_uid = sqlite3_column_int64(stmt, i);
+               i++;
+            }
             break;
          default:
             break;
       }
-/*
-          i++;
-       }
-*/
    }
 
    sqlite3_finalize(stmt);

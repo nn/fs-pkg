@@ -21,6 +21,10 @@ static void vfs_fuse_getattr(fuse_req_t req, fuse_ino_t ino, struct fuse_file_in
        * XXX: do stuff ;) 
        */
       sb.st_ino = ino;
+      sb.st_mode = i->st_mode;
+      sb.st_size = i->st_size;
+      sb.st_uid = i->st_uid;
+      sb.st_gid = i->st_gid;
       blockheap_free(inode_heap, i);
    }
 
