@@ -111,11 +111,13 @@ void       *db_query(enum db_query_res_type type, const char *fmt, ...) {
             break;
          case QUERY_INODE:
             ret = (void *)blockheap_alloc(inode_heap);
-            inode = (pkg_inode_t *)ret;
+            inode = (pkg_inode_t *) ret;
 
-            /* troll through the stupid db crap */
+            /*
+             * troll through the stupid db crap 
+             */
             while (i < cols) {
-               char *colname = sqlite3_column_name(stmt, i);
+               const char *colname = sqlite3_column_name(stmt, i);
 
                if (!strcmp(colname, "gid"))
                   inode->st_gid = sqlite3_column_int64(stmt, i);

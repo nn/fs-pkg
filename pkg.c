@@ -190,7 +190,7 @@ void pkg_close(struct pkg_handle *pkg) {
 
 /* Handle vfs_watch CREATED event */
 int pkg_import(const char *path) {
-   char       *tmp;
+   char       *tmp = NULL;
    int         infd, outfd;
    int         db_id = -1;
 
@@ -208,6 +208,7 @@ int pkg_import(const char *path) {
 
    db_begin();
 
+#if	defined(CONFIG_TOC_LIBXML2)
    /*
     * Try to extract the package TOC 
     */
@@ -217,6 +218,7 @@ int pkg_import(const char *path) {
    }
 
    Log(LOG_DEBUG, "TOC for %s extracted, processing", path);
+#endif
 
    /*
     * Process the extracted TOC 
@@ -229,11 +231,14 @@ int pkg_import(const char *path) {
       db_rollback();
    }
 
+#if	defined(CONFIG_TOC_LIBXML2)
    /*
     * clean up: remove extracted toc and free its name buffer 
     */
    unlink(tmp);
    mem_free(tmp);
+#endif
+
    return EXIT_SUCCESS;
 }
 
@@ -253,6 +258,8 @@ void pkg_init(void) {
    }
 
    pkg_lifetime = nn2_timestr_to_time(dconf_get_str("tuning.timer.pkg_gc", NULL), 60);
-   pkg_toc_zbufsize = dconf_get_int("tuning.toc.gz.buffer", 1310720);
    evt_timer_add_periodic(pkg_gc, "gc.pkg", pkg_lifetime);
+#if	defined(CONFIG_TOC_LIBXAR)
+   pkg_toc_zbufsize = dconf_get_int("tuning.toc.gz.buffer", 1310720);
+#endif
 }

@@ -143,7 +143,7 @@ static int blockheap_block_new(BlockHeap * bh) {
       void       *data;
       newblk = (void *)offset;
       newblk->block = b;
-#ifdef DEBUG_BALLOC
+#ifdef CONFIG_DEBUG_BALLOC
       newblk->magic = BALLOC_MAGIC;
 #endif
       data = (void *)((size_t) offset + sizeof(MemBlock));
@@ -310,7 +310,7 @@ int blockheap_free(BlockHeap * bh, void *ptr) {
    }
 
    memblock = (void *)((size_t) ptr - sizeof(MemBlock));
-#ifdef DEBUG_BALLOC
+#ifdef CONFIG_DEBUG_BALLOC
    if (memblock->magic != BALLOC_MAGIC) {
       blockheap_fail("memblock->magic != BALLOC_MAGIC");
       conf.dying = 1;

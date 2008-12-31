@@ -13,3 +13,9 @@ Patches to: dev-fspkg@nn2.us
 
 * We use a slightly trimmed down libfuse, however the original lib
 * should work just fine- if you dont mind the extra bloat
+-- This is needed because a lot of systems complain that
+-- libfuse is out of date using the native libfuse.
+
+----------
+* We are working libbombsquad- MIT licensed stuff for interacting with
+  with libfuse. What a pain in the ass...

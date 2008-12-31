@@ -56,6 +56,7 @@ static void vfs_dir_walk_recurse(const char *path, int depth) {
 
    closedir(d);
 }
+
 #undef MAX_RECURSE
 
 int vfs_dir_walk(void) {

@@ -6,8 +6,8 @@ path.db=fs-pkg.db
 ; between restarts for faster loading
 ;path.db.persistant=/.pkgdb
 ;path.log=fs-pkg.log
-path.mountpoint=/test
-path.pkg=/pkg
+path.mountpoint=test
+path.pkg=pkg
 sys.daemonize=false
 ; these should be fairly reasonable...
 tuning.heap.inode=128

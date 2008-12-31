@@ -10,7 +10,6 @@
 #include "memory.h"
 #include "pkg.h"
 #include "vfs.h"
-#define	DBG	      fprintf(stderr, "[%lu] %s:%d:%s\n", conf.now - conf.born, __FILE__, __LINE__, __FUNCTION__)
 #define	VFS_FUSE_C                    /* required for vfs_fuse_spill.h */
 #include "vfs_pkg.h"
 #include "vfs_spill.h"

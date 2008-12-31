@@ -25,3 +25,14 @@ objs += .obj/thread_pool.o
 objs += .obj/timestr.o
 objs += .obj/vfs.o
 objs += .obj/vfs_inotify.o
+
+${bin}: ${objs}
+	@${CC} -o $@ ${LDFLAGS} ${extra_libs} $^
+ifeq (${CONFIG_STRIP_BINS}, y)
+	@echo "[STRIP] $@"
+	@strip $@
+endif
+
+.obj/%.o:%.c
+	@echo "[CC] $< => $@"
+	@${CC} ${warn_flags} ${CFLAGS} -o $@ -c $<

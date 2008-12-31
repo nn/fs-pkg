@@ -32,3 +32,4 @@ CFLAGS += -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -fPIC
 warn_noerror := -Wall -Wno-unused -Wno-strict-aliasing -ansi -std=c99
 warn_flags := ${warn_noerror} #-Werror
 LDFLAGS := -lxml2 -lz -lcrypto -pthread -lrt -lsqlite3
+lib_ldflags += -shared -ldl

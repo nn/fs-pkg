@@ -413,7 +413,9 @@ extern      "C" {
 
                   return ev_default_loop_ptr;
    }
-   /* the default loop is the only one that handles signals and child watchers *//*
+   /*
+    * the default loop is the only one that handles signals and child watchers 
+    *//*
     * you can call this as often as you like 
     */ EV_INLINE struct ev_loop *
                ev_default_loop(unsigned int flags) {
