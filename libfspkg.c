@@ -73,6 +73,7 @@ static void _init_lib(void) {
 }
 
 static void _init(void) {
+   fprintf(stderr, "_init called\n");
    _init_lib();
 }
 
